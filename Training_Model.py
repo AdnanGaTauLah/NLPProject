@@ -10,20 +10,25 @@ from tqdm.auto import tqdm
 from torch.utils.data import DataLoader
 import torch
 
-# Load and preprocess the dataset
-def load_data(file_path):
-    # Load the CSV into a pandas DataFrame
-    df = pd.read_csv(file_path)
+# Assuming you have a function that loads the already split data
+def load_pre_split_data():
+    # Load pre-split training and validation sets (adjust paths accordingly)
+    train_df = pd.read_csv("C:/Users/Adnan Fatawi/Documents/Python/NLPenv/Dataframe/train_data.csv")
+    val_df = pd.read_csv("C:/Users/Adnan Fatawi/Documents/Python/NLPenv/Dataframe/val_data.csv")
     
-    # Extract utterance and emotion
-    texts = df['Utterance'].tolist()
-    emotions = df['Emotion'].tolist()
+    # Extract utterances and labels
+    train_texts = train_df['Utterance'].tolist()
+    train_labels = train_df['Emotion'].tolist()
+    
+    val_texts = val_df['Utterance'].tolist()
+    val_labels = val_df['Emotion'].tolist()
 
     # Encode the emotion labels into integers
     label_encoder = LabelEncoder()
-    labels = label_encoder.fit_transform(emotions)
-
-    return texts, labels, label_encoder
+    train_labels = label_encoder.fit_transform(train_labels)
+    val_labels = label_encoder.transform(val_labels)
+    
+    return train_texts, train_labels, val_texts, val_labels
 
 # Tokenize the input texts
 def tokenize_function(examples, tokenizer, max_length=256):
@@ -120,12 +125,11 @@ def main():
     print(f"Using device: {device}")
     
     # Load and split the dataset
-    texts, labels, label_encoder = load_data("C:/Users/Adnan Fatawi/Documents/Python/HuggingFaceenv/Dataframe/emotion_classification.csv")
-    train_texts, val_texts, train_labels, val_labels = train_test_split(texts, labels, test_size=0.2, random_state=42)
+    train_texts, train_labels, val_texts, val_labels = load_pre_split_data()
     
     # Load the tokenizer and model
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-    model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=len(set(labels)))
+    model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=len(set(train_labels)))
     model.to(device)
 
     # Tokenize data
@@ -133,14 +137,14 @@ def main():
     val_dataset = create_dataset(val_texts, val_labels, tokenizer)
 
     # Create DataLoaders with collate_fn
-    train_loader = DataLoader(train_dataset, shuffle=True, batch_size=32, collate_fn=collate_fn)
+    train_loader = DataLoader(train_dataset, shuffle=True, batch_size=25, collate_fn=collate_fn)
     val_loader = DataLoader(val_dataset, batch_size=32, collate_fn=collate_fn)
 
     # Set the number of epochs
-    num_epochs = 2
+    num_epochs = 3
     
     # Set up optimizer and learning rate scheduler
-    optimizer = AdamW(model.parameters(), lr=3e-5)
+    optimizer = AdamW(model.parameters(), lr=25e-6)
     num_training_steps = num_epochs * len(train_loader)
     lr_scheduler = get_scheduler("linear", optimizer=optimizer, num_warmup_steps=0, num_training_steps=num_training_steps)
 
