@@ -5,3 +5,6 @@ nltk.download('stopwords')
 
 import spacy
 spacy.cli.download("en_core_web_sm")
+
+import nltk
+nltk.download('punkt_tab')
