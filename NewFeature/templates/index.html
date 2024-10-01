@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NLP Input Form</title>
+</head>
+<body>
+    <h1>Enter Text for NLP Prediction</h1>
+    <form id="nlpForm">
+        <textarea id="inputText" placeholder="Type your text here..."></textarea>
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>Prediction: <span id="predictionResult"></span></h2>
+
+    <script>
+        document.getElementById('nlpForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const inputText = document.getElementById('inputText').value;
+
+            // Send the input to the Flask backend
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ input_text: inputText })
+            });
+
+            const data = await response.json();
+            document.getElementById('predictionResult').innerText = data.prediction;
+        });
+    </script>
+</body>
+</html>

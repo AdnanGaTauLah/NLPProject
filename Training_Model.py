@@ -82,11 +82,13 @@ def save_checkpoint(model, optimizer, epoch, loss, save_dir="checkpoints"):
         'optimizer_state_dict': optimizer.state_dict(),
         'loss': loss
     }
-    torch.save({
-    'epoch': epoch,
-    'model_state_dict': model.state_dict(),
-    'optimizer_state_dict': optimizer.state_dict(),
-    'loss': loss,}, model_save_path)
+    # torch.save({
+    # 'epoch': epoch,
+    # 'model_state_dict': model.state_dict(),
+    # 'optimizer_state_dict': optimizer.state_dict(),
+    # 'loss': loss,}, model_save_path)
+    
+    torch.save(model.state_dict(), 'model_only_state_dict.pt')
 
     print(f"Checkpoint saved at {model_save_path}")
 
@@ -141,7 +143,7 @@ def main():
     val_loader = DataLoader(val_dataset, batch_size=32, collate_fn=collate_fn)
 
     # Set the number of epochs
-    num_epochs = 3
+    num_epochs = 10
     
     # Set up optimizer and learning rate scheduler
     optimizer = AdamW(model.parameters(), lr=25e-6)
